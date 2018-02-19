@@ -6,6 +6,8 @@ var ballSpeedX = 10;
 var ballSpeedY = 4;
 
 var paddle1Y = 250;
+var paddle2Y = 250;
+const PADDLE_THICKNESS = 10;
 const PADDLE_HIGEHT = 100;
 
 /**
@@ -45,16 +47,35 @@ window.onload = function (){
 	});
 };
 
+
+// Function handle reset the ball
+function ballReset(){
+	ballSpeedX = -ballSpeedX;
+	ballX = canvas.width/2;
+	ballY = canvas.height/2;
+}
+
 function moveEverything(){
 	ballX += ballSpeedX;
 	ballY += ballSpeedY;
 
+	//Bounce the ball if it gets blockedby the left paddle
 	if(ballX < 0){
-		ballSpeedX = -ballSpeedX;
+        if (ballY > paddle1Y &&
+            ballY < paddle1Y + PADDLE_HIGEHT) {
+            ballSpeedX = -ballSpeedX;
+        } else {
+            ballReset();
+        }
 	}
 
 	if(ballX > canvas.width){
-		ballSpeedX = -ballSpeedX;
+		if (ballY > paddle2Y &&
+            ballY < paddle2Y + PADDLE_HIGEHT) {
+            ballSpeedX = -ballSpeedX;
+        } else {
+            ballReset();
+        }
 	}
 	if(ballY < 0){
 		ballSpeedY = -ballSpeedY;
@@ -69,8 +90,11 @@ function drawEverything(){
 	//Next line blanks out the screen with black
 	colorRect(0,0,canvas.width,canvas.height, 'black');
 
+	//This is the right computer paddle
+	colorRect(canvas.width - PADDLE_THICKNESS,paddle2Y,PADDLE_THICKNESS,PADDLE_HIGEHT, 'white');
+
 	//This is the left player paddle
-	colorRect(0,paddle1Y,10,PADDLE_HIGEHT, 'white');
+	colorRect(0,paddle1Y,PADDLE_THICKNESS,PADDLE_HIGEHT, 'white');
 	
 	//Next line draw the ball
 	colorCircle(ballX,ballY,10,'white')
