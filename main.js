@@ -5,6 +5,9 @@ var ballY = 50;
 var ballSpeedX = 10;
 var ballSpeedY = 4;
 
+var player1Score = 0;
+var player2Score = 0;
+
 var paddle1Y = 250;
 var paddle2Y = 250;
 const PADDLE_THICKNESS = 10;
@@ -55,7 +58,19 @@ function ballReset(){
 	ballY = canvas.height/2;
 }
 
+//Get right paddle chasing the balls vertical position
+function computerMovment(){
+	var paddle2YCenter = paddle2Y + (PADDLE_HIGEHT/2);
+	if(paddle2YCenter < ballY - 35){
+		paddle2Y += 6;
+	}else if(paddle2YCenter > ballY + 35){
+		paddle2Y -= 6;
+	}
+}
+
 function moveEverything(){
+	computerMovment();
+	
 	ballX += ballSpeedX;
 	ballY += ballSpeedY;
 
@@ -65,7 +80,8 @@ function moveEverything(){
             ballY < paddle1Y + PADDLE_HIGEHT) {
             ballSpeedX = -ballSpeedX;
         } else {
-            ballReset();
+			ballReset();
+			player2Score ++;
         }
 	}
 
@@ -74,7 +90,8 @@ function moveEverything(){
             ballY < paddle2Y + PADDLE_HIGEHT) {
             ballSpeedX = -ballSpeedX;
         } else {
-            ballReset();
+			ballReset();
+			player1Score ++;
         }
 	}
 	if(ballY < 0){
@@ -97,7 +114,10 @@ function drawEverything(){
 	colorRect(0,paddle1Y,PADDLE_THICKNESS,PADDLE_HIGEHT, 'white');
 	
 	//Next line draw the ball
-	colorCircle(ballX,ballY,10,'white')
+	colorCircle(ballX,ballY,10,'white');
+
+	canvasContext.fillText(player1Score, 100,100);
+	canvasContext.fillText(player2Score, canvas.width - 100,100); 
 }
 
 function colorCircle(centerX, centerY, radius, drawColor){
