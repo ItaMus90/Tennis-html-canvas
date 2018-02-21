@@ -7,6 +7,9 @@ var ballSpeedY = 4;
 
 var player1Score = 0;
 var player2Score = 0;
+const WINNING_SCORE = 10;
+
+var showingWinScreen = false;
 
 var paddle1Y = 250;
 var paddle2Y = 250;
@@ -42,6 +45,8 @@ window.onload = function (){
 		drawEverything();
 	}, 1000/framesPerSecond);
 	
+	canvas.addEventListener('mousedown',handleMouseClick);
+
 	// Set paddle's position value whenever mouse moves
 	canvas.addEventListener('mousemove', function(evt){
 		var mousePos = 	calculateMousePos(evt);
@@ -50,9 +55,22 @@ window.onload = function (){
 	});
 };
 
+//Mouse click after the game over
+function handleMouseClick(evt){
+	if(showingWinScreen){
+		player1Score = 0;
+		player2Score = 0;
+		showingWinScreen = false;
+
+	}
+}
 
 // Function handle reset the ball
 function ballReset(){
+	if(player1Score >= WINNING_SCORE || player2Score >= WINNING_SCORE){
+		showingWinScreen = true;
+	}
+
 	ballSpeedX = -ballSpeedX;
 	ballX = canvas.width/2;
 	ballY = canvas.height/2;
@@ -69,43 +87,62 @@ function computerMovment(){
 }
 
 function moveEverything(){
-	computerMovment();
+	if(!showingWinScreen){
+		computerMovment();
 	
-	ballX += ballSpeedX;
-	ballY += ballSpeedY;
-
-	//Bounce the ball if it gets blockedby the left paddle
-	if(ballX < 0){
-        if (ballY > paddle1Y &&
-            ballY < paddle1Y + PADDLE_HIGEHT) {
-            ballSpeedX = -ballSpeedX;
-        } else {
-			ballReset();
-			player2Score ++;
-        }
+		ballX += ballSpeedX;
+		ballY += ballSpeedY;
+	
+		//Bounce the ball if it gets blockedby the left paddle
+		if(ballX < 0){
+			if (ballY > paddle1Y &&
+				ballY < paddle1Y + PADDLE_HIGEHT) {
+				ballSpeedX = -ballSpeedX;
+				
+				//How change the ball position after it bounch in paddle 
+				var deltaY = ballY - (paddle1Y+PADDLE_HIGEHT/2);
+				ballSpeedY = deltaY * 0.35;
+			} else {
+				player2Score ++; //Must be BEFORE ballReset()
+				ballReset();
+			}
+		}
+	
+		if(ballX > canvas.width){
+			if (ballY > paddle2Y &&
+				ballY < paddle2Y + PADDLE_HIGEHT) {
+				ballSpeedX = -ballSpeedX;
+	
+				//How change the ball position after it bounch in paddle 
+				var deltaY = ballY - (paddle2Y+PADDLE_HIGEHT/2);
+				ballSpeedY = deltaY * 0.35;
+			} else {
+				player1Score ++; //Must be BEFORE ballReset()
+				ballReset();
+			}
+		}
+		if(ballY < 0){
+			ballSpeedY = -ballSpeedY;
+		}
+	
+		if(ballY > canvas.height){
+			ballSpeedY = -ballSpeedY;
+		}
 	}
+}
 
-	if(ballX > canvas.width){
-		if (ballY > paddle2Y &&
-            ballY < paddle2Y + PADDLE_HIGEHT) {
-            ballSpeedX = -ballSpeedX;
-        } else {
-			ballReset();
-			player1Score ++;
-        }
-	}
-	if(ballY < 0){
-		ballSpeedY = -ballSpeedY;
-	}
-
-	if(ballY > canvas.height){
-		ballSpeedY = -ballSpeedY;
+function drawNet(){
+	for(var i = 0; i < canvas.height; i+=40){
+		colorRect(canvas.width / 2 - 1 , i, 2, 20, 'white');
 	}
 }
 
 function drawEverything(){
 	//Next line blanks out the screen with black
 	colorRect(0,0,canvas.width,canvas.height, 'black');
+
+	//Draw the net
+	drawNet();
 
 	//This is the right computer paddle
 	colorRect(canvas.width - PADDLE_THICKNESS,paddle2Y,PADDLE_THICKNESS,PADDLE_HIGEHT, 'white');
@@ -115,6 +152,17 @@ function drawEverything(){
 	
 	//Next line draw the ball
 	colorCircle(ballX,ballY,10,'white');
+
+	if(showingWinScreen){
+		if(player1Score >= WINNING_SCORE){
+			canvasContext.fillText("Left player WON", 350,200);
+		}else if (player2Score >= WINNING_SCORE){
+			canvasContext.fillText("Right player WON", 350,200);
+		}
+		canvasContext.fillStyle =  'white';
+		canvasContext.fillText("Click to contiue", 100,100);
+		return;
+	}
 
 	canvasContext.fillText(player1Score, 100,100);
 	canvasContext.fillText(player2Score, canvas.width - 100,100); 
